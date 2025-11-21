@@ -1,13 +1,25 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package clientes;
 
-/**
- *
- * @author broncake
- */
-public class ClienteEmpleado {
-    
+import dto.EmpleadoDTO;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@FeignClient(name = "ApiEmpleado")
+public interface ClienteEmpleado {
+
+    @GetMapping("/empleado/listar")
+    List<EmpleadoDTO> listar();
+
+    @GetMapping("/empleado/buscar/{id}")
+    EmpleadoDTO buscar(@PathVariable("id") Long id);
+
+    @PostMapping("/empleado/grabar")
+    EmpleadoDTO grabar(@RequestBody EmpleadoDTO empleado);
+
+    @PutMapping("/empleado/actualizar/{id}")
+    EmpleadoDTO actualizar(@PathVariable("id") Long id, @RequestBody EmpleadoDTO empleado);
+
+    @DeleteMapping("/empleado/eliminar/{id}")
+    void eliminar(@PathVariable("id") Long id);
 }

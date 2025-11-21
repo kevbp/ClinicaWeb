@@ -1,13 +1,22 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package clientes;
 
-/**
- *
- * @author broncake
- */
-public class ClienteSlotHorario {
+import dto.SlotHorarioDTO;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@FeignClient(name = "ApiSlotHorario")
+public interface ClienteSlotHorario {
+
+    @GetMapping("/slotHorario/listar")
+    List<SlotHorarioDTO> listar();
     
+    @GetMapping("/slotHorario/listarPorHorario/{idHor}")
+    List<SlotHorarioDTO> listarPorHorario(@PathVariable("idHor") Long idHor);
+
+    @GetMapping("/slotHorario/buscar/{id}")
+    SlotHorarioDTO buscar(@PathVariable("id") Long id);
+
+    @PostMapping("/slotHorario/grabar")
+    SlotHorarioDTO grabar(@RequestBody SlotHorarioDTO slot);
 }

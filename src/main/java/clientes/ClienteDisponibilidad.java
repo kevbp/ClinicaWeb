@@ -1,13 +1,22 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package clientes;
 
-/**
- *
- * @author broncake
- */
-public class ClienteDisponibilidad {
+import dto.DisponibilidadDTO;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@FeignClient(name = "ApiDisponibilidad")
+public interface ClienteDisponibilidad {
+
+    @GetMapping("/disponibilidad/listar")
+    List<DisponibilidadDTO> listar();
+
+    @GetMapping("/disponibilidad/buscar/{id}")
+    DisponibilidadDTO buscar(@PathVariable("id") Long id);
+
+    @PostMapping("/disponibilidad/grabar")
+    DisponibilidadDTO grabar(@RequestBody DisponibilidadDTO disponibilidad);
     
+    @DeleteMapping("/disponibilidad/eliminar/{id}")
+    void eliminar(@PathVariable("id") Long id);
 }

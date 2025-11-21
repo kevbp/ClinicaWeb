@@ -7,7 +7,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
 @EnableDiscoveryClient
-@EnableFeignClients    // Para poder llamar a los otros 15 servicios
+@EnableFeignClients(basePackages = "clientes")    // Para poder llamar a los otros 15 servicios
 public class ClinicaWebApplication {
 
     public static void main(String[] args) {

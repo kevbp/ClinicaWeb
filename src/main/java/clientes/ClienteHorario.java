@@ -1,13 +1,19 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package clientes;
 
-/**
- *
- * @author broncake
- */
-public class ClienteHorario {
-    
+import dto.HorarioDTO;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@FeignClient(name = "ApiHorario")
+public interface ClienteHorario {
+
+    @GetMapping("/horario/listar")
+    List<HorarioDTO> listar();
+
+    @GetMapping("/horario/buscar/{id}")
+    HorarioDTO buscar(@PathVariable("id") Long id);
+
+    @PostMapping("/horario/grabar")
+    HorarioDTO grabar(@RequestBody HorarioDTO horario);
 }

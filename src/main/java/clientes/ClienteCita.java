@@ -1,13 +1,22 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package clientes;
 
-/**
- *
- * @author broncake
- */
-public class ClienteCita {
+import dto.CitaDTO;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@FeignClient(name = "ApiCita")
+public interface ClienteCita {
+
+    @GetMapping("/cita/listar")
+    List<CitaDTO> listar();
+
+    @GetMapping("/cita/buscar/{id}")
+    CitaDTO buscar(@PathVariable("id") Long id);
+
+    @PostMapping("/cita/grabar")
+    CitaDTO grabar(@RequestBody CitaDTO cita);
     
+    @PutMapping("/cita/actualizar/{id}")
+    CitaDTO actualizar(@PathVariable("id") Long id, @RequestBody CitaDTO cita);
 }
