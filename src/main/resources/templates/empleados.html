@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: main-layout(~{::section})}">
+    <section>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3>Empleados</h3>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalEmp"><i class="fa-solid fa-plus"></i> Nuevo</button>
+        </div>
+        <div class="card p-0 overflow-hidden">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-light"><tr><th>ID</th><th>Nombre</th><th>Cargo</th><th>Acción</th></tr></thead>
+                <tbody>
+                    <tr th:each="e : ${empleados}">
+                        <td th:text="${e.id}"></td>
+                        <td th:text="${e.nom}"></td>
+                        <td th:text="${e.car}"></td>
+                        <td><a th:href="@{/empleados/eliminar/{id}(id=${e.id})}" class="text-danger"><i class="fa-solid fa-trash"></i></a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="modal fade" id="modalEmp" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+                    <form action="/empleados/guardar" method="post" th:object="${nuevoEmpleado}">
+                        <div class="modal-header"><h5 class="modal-title">Nuevo Empleado</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                        <div class="modal-body">
+                            <div class="mb-3"><label>Nombre</label><input type="text" class="form-control" th:field="*{nom}" required></div>
+                            <div class="mb-3"><label>Cargo</label>
+                                <select class="form-select" th:field="*{car}">
+                                    <option value="Admisión">Admisión</option>
+                                    <option value="Caja">Caja</option>
+                                    <option value="Enfermería">Enfermería</option>
+                                    <option value="Admin">Admin</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer"><button type="submit" class="btn btn-primary">Guardar</button></div>
+                    </form>
+                </div></div></div>
+    </section>
+</html>

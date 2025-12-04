@@ -1,23 +1,19 @@
-
 package dto;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
 
 public class DisponibilidadDTO {
 
     private Long id;
     private Long idMed;
     private Long idEsp;
-    private LocalDate fec;
-    private LocalTime horIni;
-    private LocalTime horFin;
+    private String fec;    // Cambiado a String para evitar error 400 en formulario
+    private String horIni; // Cambiado a String
+    private String horFin; // Cambiado a String
     private String est;
 
     public DisponibilidadDTO() {
     }
 
-    public DisponibilidadDTO(Long id, Long idMed, Long idEsp, LocalDate fec, LocalTime horIni, LocalTime horFin, String est) {
+    public DisponibilidadDTO(Long id, Long idMed, Long idEsp, String fec, String horIni, String horFin, String est) {
         this.id = id;
         this.idMed = idMed;
         this.idEsp = idEsp;
@@ -51,27 +47,27 @@ public class DisponibilidadDTO {
         this.idEsp = idEsp;
     }
 
-    public LocalDate getFec() {
+    public String getFec() {
         return fec;
     }
 
-    public void setFec(LocalDate fec) {
+    public void setFec(String fec) {
         this.fec = fec;
     }
 
-    public LocalTime getHorIni() {
+    public String getHorIni() {
         return horIni;
     }
 
-    public void setHorIni(LocalTime horIni) {
+    public void setHorIni(String horIni) {
         this.horIni = horIni;
     }
 
-    public LocalTime getHorFin() {
+    public String getHorFin() {
         return horFin;
     }
 
-    public void setHorFin(LocalTime horFin) {
+    public void setHorFin(String horFin) {
         this.horFin = horFin;
     }
 
@@ -82,6 +78,4 @@ public class DisponibilidadDTO {
     public void setEst(String est) {
         this.est = est;
     }
-
-    
 }

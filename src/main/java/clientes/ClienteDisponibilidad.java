@@ -16,7 +16,10 @@ public interface ClienteDisponibilidad {
 
     @PostMapping("/disponibilidad/grabar")
     DisponibilidadDTO grabar(@RequestBody DisponibilidadDTO disponibilidad);
-    
+
+    @PutMapping("/disponibilidad/actualizar/{id}")
+    DisponibilidadDTO actualizar(@PathVariable("id") Long id, @RequestBody DisponibilidadDTO disponibilidad);
+
     @DeleteMapping("/disponibilidad/eliminar/{id}")
     void eliminar(@PathVariable("id") Long id);
 }

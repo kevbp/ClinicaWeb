@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: main-layout(~{::section})}">
+    <section>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3><i class="fa-solid fa-receipt me-2"></i>Historial de Pagos (Boletas)</h3>
+            <a href="/boletas/nueva" class="btn btn-success">
+                <i class="fa-solid fa-cash-register"></i> Ir a Caja
+            </a>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Boleta Nro</th>
+                            <th>Fecha Emisión</th>
+                            <th>Hora</th>
+                            <th>Cita Referencia</th>
+                            <th>Paciente</th>
+                            <th>Monto Total</th>
+                            <th>Cajero</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="b : ${boletas}">
+                            <td class="fw-bold" th:text="${'B-' + b.id}"></td>
+                            <td th:text="${b.fec}"></td>
+                            <td th:text="${b.hor}"></td>
+                            <td><span class="badge bg-light text-dark border" th:text="${'Ticket #' + b.idCit}"></span></td>
+                            <td th:text="${b.idPac}"></td>
+                            <td class="fw-bold text-success fs-5" th:text="${'S/ ' + b.preTot}"></td>
+                            <td class="text-muted small" th:text="${'Emp-' + b.idEmp}"></td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(boletas)}">
+                            <td colspan="7" class="text-center py-5 text-muted">No hay pagos registrados.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</html>

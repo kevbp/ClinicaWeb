@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: main-layout(~{::section})}">
+    <section>
+        <h3 class="mb-4">Reportes Generales</h3>
+        <ul class="nav nav-tabs mb-3" id="myTab" role="tablist">
+            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#citas">Citas</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#historias">Historias</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#pagos">Pagos</button></li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="citas">
+                <div class="card p-0"><table class="table table-striped mb-0">
+                        <thead class="table-dark"><tr><th>Ticket</th><th>Fecha</th><th>Paciente</th><th>Pago</th><th>Estado</th></tr></thead>
+                        <tbody><tr th:each="c : ${listaCitas}"><td th:text="${c.id}"></td><td th:text="${c.fec+' '+c.hor}"></td><td th:text="${c.idPac}"></td><td th:text="${c.estPag}"></td><td th:text="${c.estCit}"></td></tr></tbody>
+                    </table></div>
+            </div>
+            <div class="tab-pane fade" id="historias">
+                <div class="card p-0"><table class="table table-striped mb-0">
+                        <thead class="table-dark"><tr><th>HC</th><th>Paciente</th><th>Fecha Creación</th><th>Médico/Resp</th></tr></thead>
+                        <tbody><tr th:each="h : ${listaHistorias}"><td th:text="${h.id}"></td><td th:text="${h.idPac}"></td><td th:text="${h.fecCre}"></td><td th:text="${h.idEmp}"></td></tr></tbody>
+                    </table></div>
+            </div>
+            <div class="tab-pane fade" id="pagos">
+                <div class="card p-0"><table class="table table-striped mb-0">
+                        <thead class="table-dark"><tr><th>Boleta</th><th>Fecha</th><th>Cita</th><th>Monto</th><th>Cajero</th></tr></thead>
+                        <tbody><tr th:each="b : ${listaBoletas}"><td th:text="${b.id}"></td><td th:text="${b.fec}"></td><td th:text="${b.idCit}"></td><td th:text="${b.preTot}"></td><td th:text="${b.idEmp}"></td></tr></tbody>
+                    </table></div>
+            </div>
+        </div>
+    </section>
+</html>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="main-layout(content)">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>ClinicaWeb - Sistema Integral</title>
+
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+        <style>
+            body {
+                background-color: #f4f6f9;
+                font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+
+            /* Navbar Styling */
+            .navbar {
+                z-index: 1030; /* Encima del sidebar */
+            }
+
+            /* Layout Container */
+            .main-container {
+                display: flex;
+                flex-grow: 1;
+                height: calc(100vh - 56px); /* Resta altura del navbar aprox */
+                overflow: hidden;
+            }
+
+            /* Sidebar Styling */
+            .sidebar {
+                width: 260px;
+                background: #ffffff;
+                border-right: 1px solid #dee2e6;
+                overflow-y: auto;
+                flex-shrink: 0;
+                padding: 1.5rem 1rem;
+            }
+
+            .sidebar-heading {
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                font-weight: 700;
+                color: #6c757d;
+                margin-top: 1.5rem;
+                margin-bottom: 0.5rem;
+                padding-left: 0.5rem;
+            }
+
+            .nav-pills .nav-link {
+                color: #495057;
+                font-weight: 500;
+                border-radius: 0.375rem;
+                padding: 0.6rem 1rem;
+                margin-bottom: 0.25rem;
+                display: flex;
+                align-items: center;
+            }
+
+            .nav-pills .nav-link i {
+                width: 24px;
+                text-align: center;
+                margin-right: 8px;
+            }
+
+            .nav-pills .nav-link:hover {
+                background-color: #e9ecef;
+                color: #0d6efd;
+            }
+
+            .nav-pills .nav-link.active {
+                background-color: #0d6efd;
+                color: white !important;
+                box-shadow: 0 2px 4px rgba(13, 110, 253, 0.25);
+            }
+
+            /* Content Area */
+            .page-content {
+                flex-grow: 1;
+                padding: 2rem;
+                overflow-y: auto;
+                background-color: #f8f9fa;
+            }
+
+            /* Utility Classes */
+            .card {
+                border: none;
+                box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+                border-radius: 0.5rem;
+            }
+        </style>
+    </head>
+    <body>
+
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+            <div class="container-fluid">
+                <a class="navbar-brand fw-bold" href="/">
+                    <i class="fa-solid fa-heart-pulse me-2"></i>ClinicaWeb
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse justify-content-end">
+                    <ul class="navbar-nav">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fa-solid fa-circle-user me-1"></i> Administrador
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="#"><i class="fa-solid fa-user-gear me-2"></i>Perfil</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="#"><i class="fa-solid fa-right-from-bracket me-2"></i>Salir</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <div class="main-container">
+
+            <nav class="sidebar collapse d-lg-block" id="sidebarMenu">
+
+                <div class="nav flex-column nav-pills">
+                    <a href="/" class="nav-link" th:classappend="${activeLink == 'home'} ? 'active'">
+                        <i class="fa-solid fa-house"></i> Inicio
+                    </a>
+                </div>
+
+                <div class="sidebar-heading">Gestión (Entidades)</div>
+                <div class="nav flex-column nav-pills">
+                    <a href="/medicos" class="nav-link" th:classappend="${activeLink == 'medicos'} ? 'active'">
+                        <i class="fa-solid fa-user-doctor"></i> Médicos
+                    </a>
+                    <a href="/pacientes" class="nav-link" th:classappend="${activeLink == 'pacientes'} ? 'active'">
+                        <i class="fa-solid fa-hospital-user"></i> Pacientes
+                    </a>
+                    <a href="/empleados" class="nav-link" th:classappend="${activeLink == 'empleados'} ? 'active'">
+                        <i class="fa-solid fa-user-tie"></i> Empleados
+                    </a>
+                    <a href="/especialidades" class="nav-link" th:classappend="${activeLink == 'config'} ? 'active'">
+                        <i class="fa-solid fa-tags"></i> Especialidades
+                    </a>
+                    <a href="/consultorios" class="nav-link" th:classappend="${activeLink == 'config'} ? 'active'">
+                        <i class="fa-solid fa-door-closed"></i> Consultorios
+                    </a>
+                </div>
+
+                <div class="sidebar-heading">Procesos Clínicos</div>
+                <div class="nav flex-column nav-pills">
+                    <a href="/disponibilidad" class="nav-link" th:classappend="${activeLink == 'procesos'} ? 'active'">
+                        <i class="fa-regular fa-clock"></i> 1. Disponibilidad
+                    </a>
+                    <a href="/horarios" class="nav-link" th:classappend="${activeLink == 'horarios'} ? 'active'">
+                        <i class="fa-regular fa-calendar-plus"></i> 2. Programación
+                    </a>
+                    <a href="/historias" class="nav-link" th:classappend="${activeLink == 'historias'} ? 'active'">
+                        <i class="fa-solid fa-file-medical"></i> 3. Historias
+                    </a>
+                    <a href="/citas" class="nav-link" th:classappend="${activeLink == 'citas'} ? 'active'">
+                        <i class="fa-solid fa-address-book"></i> 4. Citas
+                    </a>
+                    <a href="/boletas" class="nav-link" th:classappend="${activeLink == 'boletas'} ? 'active'">
+                        <i class="fa-solid fa-cash-register"></i> 5. Caja / Pagos
+                    </a>
+                </div>
+
+                <div class="sidebar-heading">Informes</div>
+                <div class="nav flex-column nav-pills">
+                    <a href="/reportes" class="nav-link" th:classappend="${activeLink == 'reportes'} ? 'active'">
+                        <i class="fa-solid fa-chart-line"></i> Reportes Generales
+                    </a>
+                </div>
+            </nav>
+
+            <main class="page-content">
+                <div th:replace="${content}"></div>
+            </main>
+
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </body>
+</html>

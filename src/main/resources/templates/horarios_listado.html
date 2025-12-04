@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: main-layout(~{::section})}">
+    <section>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3><i class="fa-regular fa-calendar me-2"></i>Gestión de Horarios y Turnos</h3>
+            <a href="/horarios/nuevo" class="btn btn-success">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Generar Nueva Programación
+            </a>
+        </div>
+
+        <div class="row">
+            <div class="col-md-5">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light fw-bold">Horarios Programados</div>
+                    <div class="list-group list-group-flush overflow-auto" style="max-height: 500px;">
+
+                        <a th:each="h : ${horarios}" 
+                           th:href="@{/horarios/{id}/detalle(id=${h.id})}"
+                           class="list-group-item list-group-item-action"
+                           th:classappend="${horarioSeleccionado != null && horarioSeleccionado.id == h.id} ? 'active'">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1" th:text="${'Horario #' + h.id}"></h6>
+                                <small th:text="${h.fec}"></small>
+                            </div>
+                            <p class="mb-1 small">
+                                Médico ID: <span th:text="${h.idMed}"></span> | 
+                                <i class="fa-regular fa-clock"></i> <span th:text="${h.horIni + ' - ' + h.horFin}"></span>
+                            </p>
+                            <small class="badge bg-light text-dark border">Ver Slots</small>
+                        </a>
+
+                        <div th:if="${#lists.isEmpty(horarios)}" class="p-4 text-center text-muted">
+                            No hay horarios creados.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-7">
+                <div class="card shadow-sm border-primary" th:if="${horarioSeleccionado != null}">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <span><i class="fa-solid fa-list-ol me-2"></i>Slots del Horario #<span th:text="${horarioSeleccionado.id}"></span></span>
+                        <span class="badge bg-light text-primary" th:text="${#lists.size(slotsDelHorario) + ' Turnos'}"></span>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-hover mb-0 text-center">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID Slot</th>
+                                    <th>Inicio</th>
+                                    <th>Fin</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="slot : ${slotsDelHorario}">
+                                    <td class="text-muted" th:text="${slot.id}"></td>
+                                    <td class="fw-bold" th:text="${slot.horIni}"></td>
+                                    <td th:text="${slot.horFin}"></td>
+                                    <td>
+                                        <span th:if="${slot.est == 'Disponible'}" class="badge bg-success">Disponible</span>
+                                        <span th:if="${slot.est == 'Ocupado'}" class="badge bg-danger">Ocupado</span>
+                                        <span th:if="${slot.est != 'Disponible' && slot.est != 'Ocupado'}" class="badge bg-secondary" th:text="${slot.est}"></span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div th:if="${horarioSeleccionado == null}" class="text-center p-5 bg-white rounded shadow-sm">
+                    <i class="fa-solid fa-hand-pointer fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Seleccione un horario de la izquierda</h5>
+                    <p class="small text-muted">Haga clic en un elemento de la lista para ver sus intervalos de atención.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</html>

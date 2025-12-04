@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: main-layout(~{::section})}">
+    <section>
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-dark text-white"><h4><i class="fa-solid fa-cash-register"></i> Caja</h4></div>
+                    <div class="card-body p-4">
+                        <div th:if="${mensaje}" class="alert alert-success" th:text="${mensaje}"></div>
+                        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+                        <form action="/boletas/procesar" method="post" th:object="${entradaBoleta}">
+                            <div class="mb-3"><label class="fw-bold">1. Cita Pendiente de Pago</label>
+                                <select class="form-select" th:field="*{idCit}" id="citaSelect" onchange="updatePac()" required>
+                                    <option value="">-- Seleccionar --</option>
+                                    <option th:each="c : ${citasPendientes}" th:value="${c.id}" th:data-pac="${c.idPac}" th:text="${'Ticket #'+c.id+' | S/ '+c.pre}"></option>
+                                </select>
+                            </div>
+                            <div class="mb-3"><label class="fw-bold">2. ID Paciente (Confirmación)</label>
+                                <input type="text" class="form-control" th:field="*{idPac}" id="idPacInput" readonly>
+                            </div>
+                            <div class="mb-4"><label class="fw-bold">3. Cajero</label>
+                                <select class="form-select" th:field="*{idEmp}">
+                                    <option th:each="e : ${empleados}" th:value="${e.id}" th:text="${e.nom}"></option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100">Pagar y Emitir Boleta</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+            function updatePac() {
+                const sel = document.getElementById('citaSelect');
+                const opt = sel.options[sel.selectedIndex];
+                document.getElementById('idPacInput').value = opt.getAttribute('data-pac') || '';
+            }
+        </script>
+    </section>
+</html>

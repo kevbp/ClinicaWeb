@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: main-layout(~{::section})}">
+    <section>
+        <div class="d-flex justify-content-between mb-4">
+            <h3>Apertura de Historia Médica</h3>
+            <a href="/historias" class="btn btn-outline-secondary">Ver Historias</a>
+        </div>
+        <div class="card p-4 mx-auto" style="max-width: 800px;">
+            <div th:if="${mensaje}" class="alert alert-success" th:text="${mensaje}"></div>
+            <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+            <form action="/historias/procesar" method="post" th:object="${entradaHistoria}">
+                <h6 class="text-primary">Datos del Paciente (Triaje)</h6>
+                <div class="row mb-3">
+                    <div class="col-md-4"><label>DNI</label><input type="number" class="form-control" th:field="*{dni}" required></div>
+                    <div class="col-md-8"><label>Nombre Completo</label><input type="text" class="form-control" th:field="*{nom}" required></div>
+                </div>
+                <div class="row mb-4">
+                    <div class="col"><label>Edad</label><input type="number" class="form-control" th:field="*{eda}" required></div>
+                    <div class="col"><label>Peso (Kg)</label><input type="number" step="0.1" class="form-control" th:field="*{pes}" required></div>
+                    <div class="col"><label>Talla (m)</label><input type="number" step="0.01" class="form-control" th:field="*{tal}" required></div>
+                </div>
+                <div class="mb-3"><label class="fw-bold">Enfermera/o Responsable</label>
+                    <select class="form-select" th:field="*{idEmp}">
+                        <option th:each="e : ${empleados}" th:value="${e.id}" th:text="${e.nom}"></option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 py-2">Registrar y Abrir Historia</button>
+            </form>
+        </div>
+    </section>
+</html>

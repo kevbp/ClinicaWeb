@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: main-layout(~{::section})}">
+    <section>
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white"><h4>Reservar Cita Médica</h4></div>
+                    <div class="card-body p-4">
+                        <div th:if="${mensaje}" class="alert alert-success" th:text="${mensaje}"></div>
+                        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+                        <form action="/citas/guardar" method="post" th:object="${entradaCita}">
+                            <div class="mb-3"><label class="fw-bold">1. Paciente</label>
+                                <select class="form-select" th:field="*{idPac}" required>
+                                    <option value="">-- Seleccionar --</option>
+                                    <option th:each="p : ${pacientes}" th:value="${p.id}" th:text="${p.dni + ' - ' + p.nom}"></option>
+                                </select>
+                            </div>
+                            <div class="mb-3"><label class="fw-bold">2. Horario Disponible</label>
+                                <select class="form-select" th:field="*{idSlo}" required>
+                                    <option value="">-- Seleccionar Slot --</option>
+                                    <option th:each="s : ${slots}" th:value="${s.id}" th:text="${'Slot #'+s.id+' ('+s.horIni+' - '+s.horFin+')'}"></option>
+                                </select>
+                                <div class="form-text text-danger" th:if="${#lists.isEmpty(slots)}">No hay horarios disponibles.</div>
+                            </div>
+                            <div class="mb-4"><label class="fw-bold">3. Responsable</label>
+                                <select class="form-select" th:field="*{idEmp}">
+                                    <option th:each="e : ${empleados}" th:value="${e.id}" th:text="${e.nom}"></option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100" th:disabled="${#lists.isEmpty(slots)}">Confirmar Reserva</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</html>

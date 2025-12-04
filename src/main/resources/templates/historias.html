@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: main-layout(~{::section})}">
+    <section>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3>Listado de Historias</h3>
+            <a href="/historias/nueva" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Nueva</a>
+        </div>
+        <div class="card p-0">
+            <table class="table table-striped mb-0">
+                <thead><tr><th>Nro HC</th><th>ID Paciente</th><th>Creación</th><th>Responsable</th></tr></thead>
+                <tbody>
+                    <tr th:each="h : ${historias}">
+                        <td class="fw-bold" th:text="${'HC-'+h.id}"></td>
+                        <td th:text="${h.idPac}"></td>
+                        <td th:text="${h.fecCre + ' ' + h.HorCre}"></td>
+                        <td th:text="${h.idEmp}"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</html>
