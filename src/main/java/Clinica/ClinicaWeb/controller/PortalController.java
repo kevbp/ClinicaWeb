@@ -2,6 +2,7 @@ package Clinica.ClinicaWeb.controller;
 
 import clientes.*;
 import dto.*;
+import java.util.ArrayList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -37,6 +38,10 @@ public class PortalController {
     private ClienteHistoria clienteHistoria;
     @Autowired
     private ClienteBoleta clienteBoleta;
+    @Autowired
+    private ClienteNuevaAtencion clienteNuevaAtencion;
+    @Autowired
+    private ClienteGestionAtencion clienteGestionAtencion;
 
     // --- ORQUESTADORES ---
     @Autowired
@@ -341,5 +346,88 @@ public class PortalController {
         model.addAttribute("listaBoletas", clienteBoleta.listar());
         model.addAttribute("listaHorarios", clienteHorario.listar());
         return "reportes";
+    }
+
+    @GetMapping("/atenciones")
+    public String listarAtenciones(Model model) {
+        model.addAttribute("activeLink", "atenciones");
+
+        // A. Traemos la lista básica (Solo tiene IDs)
+        List<CitaDTO> citasBasicas = clienteCita.listar();
+
+        // B. Creamos una lista para las citas completas (Con Nombres)
+        List<SalidaCitaDTO> citasPorAtender = new ArrayList<>();
+
+        // C. Recorremos y enriquecemos cada cita
+        if (citasBasicas != null) {
+            for (CitaDTO c : citasBasicas) {
+                // Filtramos solo las activas
+                if ("Activo".equalsIgnoreCase(c.getEstCit())) {
+                    try {
+                        // Buscamos el detalle completo usando el Orquestador
+                        SalidaCitaDTO citaCompleta = clienteGestionCita.buscar(c.getId());
+
+                        // Si existe, la agregamos a la lista final
+                        if (citaCompleta != null) {
+                            citasPorAtender.add(citaCompleta);
+                        }
+                    } catch (Exception e) {
+                        System.err.println("Error cargando detalles de la cita " + c.getId());
+                    }
+                }
+            }
+        }
+
+        // D. Enviamos la lista ENRIQUECIDA a la vista
+        model.addAttribute("citas", citasPorAtender);
+        return "atenciones";
+    }
+
+    // 2. PREPARAR ATENCIÓN (Al presionar el botón "Atender")
+    @GetMapping("/atenciones/atender/{idCita}")
+    public String prepararAtencion(@PathVariable Long idCita, Model model) {
+        model.addAttribute("activeLink", "atenciones");
+
+        // A. Traemos la cita completa (SalidaCitaDTO tiene los nombres de Paciente/Medico)
+        SalidaCitaDTO cita = clienteGestionCita.buscar(idCita);
+
+        // B. Validación de Pago: Si no está pagado, devolvemos error.
+        if (!"Pagado".equalsIgnoreCase(cita.getEstPag())) {
+            model.addAttribute("error", "La cita #" + idCita + " está PENDIENTE de pago. Debe regularizar en Caja.");
+            return listarAtenciones(model); // Re-carga la lista con el mensaje de error
+        }
+
+        // C. Ejecutar Microservicio 'NuevaAtencion' (Prepara el contexto/memoria)
+        try {
+            clienteNuevaAtencion.iniciarAtencion(new EntradaNuevaAtencionDTO(idCita));
+        } catch (Exception e) {
+            model.addAttribute("error", "Error al iniciar contexto de atención: " + e.getMessage());
+            return listarAtenciones(model);
+        }
+
+        // D. Cargar datos para el formulario 'atencion_form.html'
+        model.addAttribute("cita", cita); // Datos para rellenar (Paciente, Especialidad, Médico original)
+        model.addAttribute("medicos", clienteMedico.listar()); // Lista para la lupa (cambio de médico)
+
+        // Objeto para el formulario (Diagnóstico, Tratamiento, Médico Final)
+        EntradaAtencionDTO entrada = new EntradaAtencionDTO();
+        entrada.setIdMed(cita.getMed().getId()); // Por defecto, el médico es el de la cita
+        model.addAttribute("entradaAtencion", entrada);
+
+        return "atencion_form";
+    }
+
+    // 3. GRABAR ATENCIÓN (Ejecuta ApiGestionAtencion)
+    @PostMapping("/atenciones/guardar")
+    public String guardarAtencion(@ModelAttribute EntradaAtencionDTO entrada, Model model) {
+        try {
+            // El idCita ya lo tiene el microservicio ApiNuevaAtencion en memoria/contexto
+            SalidaAtencionDTO salida = clienteGestionAtencion.guardarAtencion(entrada);
+            model.addAttribute("mensaje", "¡Atención grabada con éxito! ID Atención: " + salida.getIdAte());
+        } catch (Exception e) {
+            model.addAttribute("error", "Error al grabar la atención: " + e.getMessage());
+        }
+        // Volvemos al listado
+        return listarAtenciones(model);
     }
 }

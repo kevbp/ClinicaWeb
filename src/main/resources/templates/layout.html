@@ -19,14 +19,14 @@
 
             /* Navbar Styling */
             .navbar {
-                z-index: 1030; /* Encima del sidebar */
+                z-index: 1030;
             }
 
             /* Layout Container */
             .main-container {
                 display: flex;
                 flex-grow: 1;
-                height: calc(100vh - 56px); /* Resta altura del navbar aprox */
+                height: calc(100vh - 56px);
                 overflow: hidden;
             }
 
@@ -167,6 +167,9 @@
                     </a>
                     <a href="/boletas" class="nav-link" th:classappend="${activeLink == 'boletas'} ? 'active'">
                         <i class="fa-solid fa-cash-register"></i> 5. Caja / Pagos
+                    </a>
+                    <a href="/atenciones" class="nav-link" th:classappend="${activeLink == 'atenciones'} ? 'active'">
+                        <i class="fa-solid fa-file-waveform me-2" style="width:24px; text-align:center;"></i> 6. Gestión Atenciones
                     </a>
                 </div>
 
