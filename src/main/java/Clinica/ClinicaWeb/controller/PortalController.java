@@ -2,6 +2,8 @@ package Clinica.ClinicaWeb.controller;
 
 import clientes.*;
 import dto.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -52,21 +54,35 @@ public class PortalController {
     private ClienteGestionHistoria clienteGestionHistoria;
     @Autowired
     private ClienteGestionBoleta clienteGestionBoleta;
-    
-    // --- NUEVOS CLIENTES: RECETAS ---
-    @Autowired private ClienteReceta clienteReceta;               // Listar
-    @Autowired private ClienteNuevaReceta clienteNuevaReceta;     // Contexto
-    @Autowired private ClienteCestaReceta clienteCestaReceta;     // Cesta
-    @Autowired private ClienteGestionReceta clienteGestionReceta; // Grabar/Buscar
-    @Autowired private ClienteApiMedicamento clienteApiMedicamento; // Catálogo
 
-    // --- NUEVOS CLIENTES: FICHAS DE ANÁLISIS ---
-    @Autowired private ClienteFichaAnalisis clienteFicha;         // Listar
-    @Autowired private ClienteNuevaFichaAnalisis clienteNuevaFicha; // Contexto
-    @Autowired private ClienteCestaFichaAnalisis clienteCestaFicha; // Cesta
-    @Autowired private ClienteGestionFichaAnalisis clienteGestionFicha; // Grabar/Buscar
-    @Autowired private ClienteTipoAnalisis clienteTipoAnalisis;   // Catálogo
-    
+    // --- CLIENTE AUXILIAR (Listados planos) ---
+    @Autowired
+    private ClienteAtencion clienteAtencion; // Para el modal de selección (ApiAtencion)
+
+    // --- CLIENTES RECETA ---
+    @Autowired
+    private ClienteReceta clienteReceta;
+    @Autowired
+    private ClienteNuevaReceta clienteNuevaReceta;
+    @Autowired
+    private ClienteCestaReceta clienteCestaReceta;
+    @Autowired
+    private ClienteGestionReceta clienteGestionReceta;
+    @Autowired
+    private ClienteApiMedicamento clienteApiMedicamento;
+
+    // --- CLIENTES FICHA ANÁLISIS ---
+    @Autowired
+    private ClienteFichaAnalisis clienteFicha;
+    @Autowired
+    private ClienteNuevaFichaAnalisis clienteNuevaFicha;
+    @Autowired
+    private ClienteCestaFichaAnalisis clienteCestaFicha;
+    @Autowired
+    private ClienteGestionFichaAnalisis clienteGestionFicha;
+    @Autowired
+    private ClienteTipoAnalisis clienteTipoAnalisis;
+
     // ==========================================
     // HOME
     // ==========================================
@@ -443,5 +459,165 @@ public class PortalController {
         }
         // Volvemos al listado
         return listarAtenciones(model);
+    }
+
+    @GetMapping("/recetas")
+    public String listarRecetas(Model model, @RequestParam(required = false) Long idVer) {
+        model.addAttribute("activeLink", "recetas");
+
+        try {
+            model.addAttribute("recetas", clienteReceta.listar());
+        } catch (Exception e) {
+            model.addAttribute("recetas", new ArrayList<>());
+        }
+
+        try {
+            model.addAttribute("atenciones", clienteAtencion.listar());
+        } catch (Exception e) {
+            model.addAttribute("atenciones", new ArrayList<>());
+        }
+
+        if (idVer != null) {
+            try {
+                model.addAttribute("recetaVer", clienteGestionReceta.buscar(idVer));
+                model.addAttribute("modalVerOpen", true);
+            } catch (Exception e) {
+                model.addAttribute("error", "Error cargando detalle: " + e.getMessage());
+            }
+        }
+        return "recetas_listado";
+    }
+
+    @PostMapping("/recetas/iniciar")
+    public String iniciarReceta(@RequestParam Long idAte) {
+        clienteNuevaReceta.iniciar(new EntradaInicioDTO(idAte));
+        clienteCestaReceta.nuevaCesta();
+        return "redirect:/recetas/nueva";
+    }
+
+    @GetMapping("/recetas/nueva")
+    public String formNuevaReceta(Model model) {
+        model.addAttribute("activeLink", "recetas");
+        try {
+            model.addAttribute("cabecera", clienteNuevaReceta.obtenerSalida());
+            model.addAttribute("cesta", clienteCestaReceta.verCesta());
+            model.addAttribute("total", clienteCestaReceta.verTotal());
+            model.addAttribute("medicamentos", clienteApiMedicamento.listar());
+        } catch (Exception e) {
+            return "redirect:/recetas";
+        }
+        return "receta_form";
+    }
+
+    @PostMapping("/recetas/agregar")
+    public String agregarMedicamento(
+            @RequestParam Long idMto, @RequestParam String nom,
+            @RequestParam String des, @RequestParam double pre, @RequestParam int can) {
+
+        LineaRecetaDTO linea = new LineaRecetaDTO(idMto, nom, des, pre, can);
+        // linea.setImporte(pre * can); // Descomentar si tu DTO no lo calcula solo
+        clienteCestaReceta.agregar(linea);
+        return "redirect:/recetas/nueva";
+    }
+
+    @GetMapping("/recetas/quitar/{id}")
+    public String quitarMedicamento(@PathVariable Long id) {
+        clienteCestaReceta.quitar(id);
+        return "redirect:/recetas/nueva";
+    }
+
+    @PostMapping("/recetas/guardar")
+    public String guardarReceta(@RequestParam Long idMed) {
+        EntradaRecetaDTO entrada = new EntradaRecetaDTO();
+        entrada.setFec(LocalDate.now().toString());
+        entrada.setHor(LocalTime.now().toString().substring(0, 5));
+        entrada.setIdMed(idMed);
+
+        clienteGestionReceta.grabar(entrada);
+        return "redirect:/recetas";
+    }
+
+    // ==========================================
+    // MÓDULO FICHA ANÁLISIS
+    // ==========================================
+    @GetMapping("/analisis")
+    public String listarAnalisis(Model model, @RequestParam(required = false) Long idVer) {
+        model.addAttribute("activeLink", "analisis");
+
+        try {
+            model.addAttribute("fichas", clienteFicha.listar());
+        } catch (Exception e) {
+            model.addAttribute("fichas", new ArrayList<>());
+        }
+
+        try {
+            model.addAttribute("atenciones", clienteAtencion.listar());
+        } catch (Exception e) {
+            model.addAttribute("atenciones", new ArrayList<>());
+        }
+
+        if (idVer != null) {
+            try {
+                model.addAttribute("fichaVer", clienteGestionFicha.buscar(idVer));
+                model.addAttribute("modalVerOpen", true);
+            } catch (Exception e) {
+                model.addAttribute("error", "Error detalle: " + e.getMessage());
+            }
+        }
+        return "analisis_listado";
+    }
+
+    @PostMapping("/analisis/iniciar")
+    public String iniciarAnalisis(@RequestParam Long idAte) {
+        clienteNuevaFicha.iniciar(new EntradaInicioDTO(idAte));
+        clienteCestaFicha.nuevaCesta();
+        return "redirect:/analisis/nueva";
+    }
+
+    @GetMapping("/analisis/nueva")
+    public String formNuevaAnalisis(Model model) {
+        model.addAttribute("activeLink", "analisis");
+        try {
+            model.addAttribute("cabecera", clienteNuevaFicha.obtenerSalida());
+            model.addAttribute("cesta", clienteCestaFicha.verCesta());
+            model.addAttribute("total", clienteCestaFicha.verTotal());
+            model.addAttribute("tiposAnalisis", clienteTipoAnalisis.listar());
+        } catch (Exception e) {
+            return "redirect:/analisis";
+        }
+        return "analisis_form";
+    }
+
+    @PostMapping("/analisis/agregar")
+    public String agregarAnalisis(
+            @RequestParam Long idTipAna, @RequestParam String nom,
+            @RequestParam String des, @RequestParam double pre, @RequestParam int can) {
+
+        LineaFichaAnalisisDTO linea = new LineaFichaAnalisisDTO();
+        linea.setIdTipAna(idTipAna);
+        linea.setNom(nom);
+        linea.setDes(des);
+        linea.setPre(pre);
+        linea.setCan(can);
+
+        clienteCestaFicha.agregar(linea);
+        return "redirect:/analisis/nueva";
+    }
+
+    @GetMapping("/analisis/quitar/{id}")
+    public String quitarAnalisis(@PathVariable Long id) {
+        clienteCestaFicha.quitar(id);
+        return "redirect:/analisis/nueva";
+    }
+
+    @PostMapping("/analisis/guardar")
+    public String guardarAnalisis(@RequestParam Long idMed) {
+        EntradaFichaAnalisisDTO entrada = new EntradaFichaAnalisisDTO();
+        entrada.setFec(LocalDate.now().toString());
+        entrada.setHor(LocalTime.now().toString().substring(0, 5));
+        entrada.setIdMed(idMed);
+
+        clienteGestionFicha.grabar(entrada);
+        return "redirect:/analisis";
     }
 }
