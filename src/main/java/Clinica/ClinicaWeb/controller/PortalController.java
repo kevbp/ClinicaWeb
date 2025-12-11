@@ -52,7 +52,21 @@ public class PortalController {
     private ClienteGestionHistoria clienteGestionHistoria;
     @Autowired
     private ClienteGestionBoleta clienteGestionBoleta;
+    
+    // --- NUEVOS CLIENTES: RECETAS ---
+    @Autowired private ClienteReceta clienteReceta;               // Listar
+    @Autowired private ClienteNuevaReceta clienteNuevaReceta;     // Contexto
+    @Autowired private ClienteCestaReceta clienteCestaReceta;     // Cesta
+    @Autowired private ClienteGestionReceta clienteGestionReceta; // Grabar/Buscar
+    @Autowired private ClienteApiMedicamento clienteApiMedicamento; // Catálogo
 
+    // --- NUEVOS CLIENTES: FICHAS DE ANÁLISIS ---
+    @Autowired private ClienteFichaAnalisis clienteFicha;         // Listar
+    @Autowired private ClienteNuevaFichaAnalisis clienteNuevaFicha; // Contexto
+    @Autowired private ClienteCestaFichaAnalisis clienteCestaFicha; // Cesta
+    @Autowired private ClienteGestionFichaAnalisis clienteGestionFicha; // Grabar/Buscar
+    @Autowired private ClienteTipoAnalisis clienteTipoAnalisis;   // Catálogo
+    
     // ==========================================
     // HOME
     // ==========================================
