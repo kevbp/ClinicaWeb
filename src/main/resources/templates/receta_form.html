@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: main-layout(~{::section})}">
+    <section>
+        <div class="container py-2">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h4">Nueva Receta Médica</h2>
+                <a href="/recetas" class="btn btn-outline-secondary">Cancelar</a>
+            </div>
+
+            <div class="card mb-4 border-primary shadow-sm">
+                <div class="card-header bg-primary text-white bg-opacity-75">
+                    <i class="fa-solid fa-user-injured me-2"></i>Datos de la Atención
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3 border-end">
+                            <small class="text-muted d-block text-uppercase">Nro. Atención</small>
+                            <strong class="fs-5" th:text="${cabecera.ate.idAte}"></strong>
+                        </div>
+                        <div class="col-md-5 border-end">
+                            <small class="text-muted d-block text-uppercase">Paciente</small>
+                            <strong class="fs-5 text-primary" th:text="${cabecera.ate.pac.nom} + ' ' + ${cabecera.ate.pac.ape}"></strong>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted d-block text-uppercase">Médico</small>
+                            <strong class="fs-5" th:text="${cabecera.ate.cita.med.nom} + ' ' + ${cabecera.ate.cita.med.ape}"></strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                    <h5 class="mb-0 text-secondary">Medicamentos Agregados</h5>
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalCatalogo">
+                        <i class="fa-solid fa-pills me-2"></i>Agregar Medicamento
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-striped mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Nombre</th>
+                                <th>Descripción</th>
+                                <th>Precio Unit.</th>
+                                <th class="text-center">Cantidad</th>
+                                <th class="text-end">Importe</th>
+                                <th class="text-center">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(cesta)}">
+                                <td colspan="6" class="text-center py-4 text-muted">La lista está vacía. Agregue medicamentos.</td>
+                            </tr>
+                            <tr th:each="item : ${cesta}">
+                                <td class="ps-4" th:text="${item.nom}"></td>
+                                <td th:text="${item.des}"></td>
+                                <td th:text="${item.pre}"></td>
+                                <td class="text-center fw-bold" th:text="${item.can}"></td>
+                                <td class="text-end text-success fw-bold" th:text="${#numbers.formatDecimal(item.importe, 1, 2)}"></td>
+                                <td class="text-center">
+                                    <a th:href="@{/recetas/quitar/{id}(id=${item.idMto})}" class="btn btn-sm btn-outline-danger border-0">
+                                        <i class="fa-solid fa-trash-can fa-lg"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot th:unless="${#lists.isEmpty(cesta)}">
+                            <tr class="table-active">
+                                <td colspan="4" class="text-end fw-bold fs-5">TOTAL A PAGAR:</td>
+                                <td class="text-end fw-bold fs-5 text-primary" th:text="'S/ ' + ${#numbers.formatDecimal(total, 1, 2)}"></td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div class="card-footer bg-white text-end py-3">
+                    <form th:action="@{/recetas/guardar}" method="post">
+                        <input type="hidden" name="idMed" th:value="${cabecera.ate.cita.med.id}"/>
+                        <button type="submit" class="btn btn-primary btn-lg px-5" th:disabled="${#lists.isEmpty(cesta)}">
+                            <i class="fa-solid fa-save me-2"></i>GUARDAR RECETA
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modalCatalogo" tabindex="-1">
+            <div class="modal-dialog modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Catálogo de Medicamentos</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-0">
+                        <div class="list-group list-group-flush">
+                            <div th:each="m : ${medicamentos}" class="list-group-item">
+                                <form th:action="@{/recetas/agregar}" method="post" class="row align-items-center g-2">
+                                    <input type="hidden" name="idMto" th:value="${m.id}"/>
+                                    <input type="hidden" name="nom" th:value="${m.nom}"/>
+                                    <input type="hidden" name="des" th:value="${m.des}"/>
+                                    <input type="hidden" name="pre" th:value="${m.pre}"/>
+
+                                    <div class="col-7">
+                                        <div class="fw-bold" th:text="${m.nom}"></div>
+                                        <div class="small text-muted" th:text="${m.des}"></div>
+                                        <div class="text-success small fw-bold" th:text="'S/ ' + ${m.pre}"></div>
+                                    </div>
+                                    <div class="col-3">
+                                        <input type="number" name="can" class="form-control form-control-sm text-center" value="1" min="1" required placeholder="Cant.">
+                                    </div>
+                                    <div class="col-2 text-end">
+                                        <button type="submit" class="btn btn-sm btn-outline-success">
+                                            <i class="fa-solid fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</html>

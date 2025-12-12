@@ -1,6 +1,6 @@
 package clientes;
 
-import dto.EntradaFichaAnalisisDTO; // <--- Importante
+import dto.EntradaFichaAnalisisDTO;
 import dto.SalidaFichaAnalisisDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 public interface ClienteGestionFichaAnalisis {
 
     @PostMapping("/gestionFichaAnalisis/grabar")
-    SalidaFichaAnalisisDTO grabar(@RequestBody EntradaFichaAnalisisDTO entrada); // <--- CAMBIADO
+    SalidaFichaAnalisisDTO grabar(@RequestBody EntradaFichaAnalisisDTO entrada); // Usa DTO
 
     @GetMapping("/gestionFichaAnalisis/buscar/{id}")
     SalidaFichaAnalisisDTO buscar(@PathVariable("id") Long id);

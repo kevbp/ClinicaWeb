@@ -1,6 +1,6 @@
 package clientes;
 
-import dto.EntradaInicioDTO; // <--- Importante
+import dto.EntradaInicioDTO;
 import dto.SalidaNuevaFichaAnalisisDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface ClienteNuevaFichaAnalisis {
 
     @PostMapping("/apiNuevaFichaAnalisis/nuevo")
-    void iniciar(@RequestBody EntradaInicioDTO entrada); // <--- CAMBIADO
+    void iniciar(@RequestBody EntradaInicioDTO entrada); // Usa DTO
 
     @GetMapping("/apiNuevaFichaAnalisis/salida")
     SalidaNuevaFichaAnalisisDTO obtenerSalida();

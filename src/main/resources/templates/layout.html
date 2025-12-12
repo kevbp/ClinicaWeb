@@ -169,7 +169,17 @@
                         <i class="fa-solid fa-cash-register"></i> 5. Caja / Pagos
                     </a>
                     <a href="/atenciones" class="nav-link" th:classappend="${activeLink == 'atenciones'} ? 'active'">
-                        <i class="fa-solid fa-file-waveform me-2" style="width:24px; text-align:center;"></i> 6. Gestión Atenciones
+                        <i class="fa-solid fa-file-waveform me-2"></i> 6. Gestión Atenciones
+                    </a>
+                </div>
+
+                <div class="sidebar-heading">Farmacia y Laboratorio</div>
+                <div class="nav flex-column nav-pills">
+                    <a href="/recetas" class="nav-link" th:classappend="${activeLink == 'recetas'} ? 'active'">
+                        <i class="fa-solid fa-prescription-bottle-medical"></i> 7. Recetas
+                    </a>
+                    <a href="/analisis" class="nav-link" th:classappend="${activeLink == 'analisis'} ? 'active'">
+                        <i class="fa-solid fa-microscope"></i> 8. Fichas de Análisis
                     </a>
                 </div>
 

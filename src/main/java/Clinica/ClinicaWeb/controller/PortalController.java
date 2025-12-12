@@ -56,20 +56,21 @@ public class PortalController {
     private ClienteGestionBoleta clienteGestionBoleta;
 
     // --- CLIENTE AUXILIAR (Listados planos) ---
+    // --- CLIENTE AUXILIAR (Listados planos) ---
     @Autowired
-    private ClienteAtencion clienteAtencion; // Para el modal de selección (ApiAtencion)
+    private ClienteAtencion clienteAtencion;
 
     // --- CLIENTES RECETA ---
     @Autowired
-    private ClienteReceta clienteReceta;
+    private ClienteReceta clienteReceta;               // Listar Recetas
     @Autowired
-    private ClienteNuevaReceta clienteNuevaReceta;
+    private ClienteNuevaReceta clienteNuevaReceta;     // Cabecera/Contexto
     @Autowired
-    private ClienteCestaReceta clienteCestaReceta;
+    private ClienteCestaReceta clienteCestaReceta;     // Cesta
     @Autowired
-    private ClienteGestionReceta clienteGestionReceta;
+    private ClienteGestionReceta clienteGestionReceta; // Grabar/Buscar Detalle
     @Autowired
-    private ClienteApiMedicamento clienteApiMedicamento;
+    private ClienteApiMedicamento clienteApiMedicamento; // Catálogo
 
     // --- CLIENTES FICHA ANÁLISIS ---
     @Autowired
@@ -461,22 +462,29 @@ public class PortalController {
         return listarAtenciones(model);
     }
 
+    // ==========================================
+    // MÓDULO RECETAS (FLUJO NUEVO)
+    // ==========================================
+    // 1. VISTA RECETAS (Listado Histórico + Modal Nueva)
     @GetMapping("/recetas")
-    public String listarRecetas(Model model, @RequestParam(required = false) Long idVer) {
+    public String vistaRecetas(Model model, @RequestParam(required = false) Long idVer) {
         model.addAttribute("activeLink", "recetas");
 
+        // Listar Recetas (Desde ApiReceta)
         try {
             model.addAttribute("recetas", clienteReceta.listar());
         } catch (Exception e) {
             model.addAttribute("recetas", new ArrayList<>());
         }
 
+        // Listar Atenciones (Desde ApiAtencion - directo para el modal)
         try {
             model.addAttribute("atenciones", clienteAtencion.listar());
         } catch (Exception e) {
             model.addAttribute("atenciones", new ArrayList<>());
         }
 
+        // Ver Detalles (Desde ApiGestionReceta - Modal)
         if (idVer != null) {
             try {
                 model.addAttribute("recetaVer", clienteGestionReceta.buscar(idVer));
@@ -485,139 +493,113 @@ public class PortalController {
                 model.addAttribute("error", "Error cargando detalle: " + e.getMessage());
             }
         }
-        return "recetas_listado";
+        return "recetas_listado"; // Nombre solicitado
     }
 
+    // 2. INICIAR PROCESO (Redirecciona a la vista de creación)
     @PostMapping("/recetas/iniciar")
     public String iniciarReceta(@RequestParam Long idAte) {
+        // Enviar contexto a ApiNuevaReceta (que busca internamente en ApiGestionAtencion)
         clienteNuevaReceta.iniciar(new EntradaInicioDTO(idAte));
+
+        // Limpiar cesta para empezar de cero
         clienteCestaReceta.nuevaCesta();
+
         return "redirect:/recetas/nueva";
     }
 
+    // 3. NUEVA RECETA (Cabecera + Cesta)
     @GetMapping("/recetas/nueva")
-    public String formNuevaReceta(Model model) {
+    public String nuevaReceta(Model model) {
         model.addAttribute("activeLink", "recetas");
         try {
-            model.addAttribute("cabecera", clienteNuevaReceta.obtenerSalida());
+            // 1. Obtener Cabecera
+            SalidaNuevaRecetaDTO cabecera = clienteNuevaReceta.obtenerSalida();
+
+            // --- [CORRECCIÓN CRÍTICA] VALIDACIÓN DE NULOS ---
+            // Si el microservicio no tiene datos en memoria (cabecera o atención nula),
+            // redirigimos al listado para evitar el error ERR_INCOMPLETE_CHUNKED_ENCODING.
+            if (cabecera == null || cabecera.getAte() == null) {
+                return "redirect:/recetas";
+            }
+            // ------------------------------------------------
+
+            model.addAttribute("cabecera", cabecera);
+
+            // 2. Obtener Cesta y Total
             model.addAttribute("cesta", clienteCestaReceta.verCesta());
             model.addAttribute("total", clienteCestaReceta.verTotal());
-            model.addAttribute("medicamentos", clienteApiMedicamento.listar());
+
+            // 3. Obtener Médicos (Para el selector que añadiste)
+            model.addAttribute("medicos", clienteMedico.listar());
+
         } catch (Exception e) {
+            System.err.println("Error cargando nueva receta: " + e.getMessage());
             return "redirect:/recetas";
         }
-        return "receta_form";
+
+        // Asegúrate que este nombre coincida con tu archivo HTML (receta_form.html o nueva_receta.html)
+        return "nueva_receta";
     }
 
+    // 4. CATÁLOGO RECETA (Selección de Medicamentos)
+    @GetMapping("/recetas/catalogo")
+    public String catalogoReceta(Model model) {
+        model.addAttribute("activeLink", "recetas");
+        try {
+            // Listar todos los medicamentos
+            model.addAttribute("medicamentos", clienteApiMedicamento.listar());
+        } catch (Exception e) {
+            model.addAttribute("medicamentos", new ArrayList<>());
+        }
+        return "catalogo_receta";
+    }
+
+    // 5. AGREGAR MEDICAMENTO (Acción desde el Catálogo)
     @PostMapping("/recetas/agregar")
     public String agregarMedicamento(
-            @RequestParam Long idMto, @RequestParam String nom,
-            @RequestParam String des, @RequestParam double pre, @RequestParam int can) {
+            @RequestParam Long idMto,
+            @RequestParam String nom,
+            @RequestParam String des,
+            @RequestParam double pre,
+            @RequestParam int can) { // Cantidad manual del usuario
 
+        // El importe lo calcula ApiCestaReceta o el DTO, enviamos los datos base
         LineaRecetaDTO linea = new LineaRecetaDTO(idMto, nom, des, pre, can);
-        // linea.setImporte(pre * can); // Descomentar si tu DTO no lo calcula solo
+        // linea.setImporte(pre * can); // Descomentar si el backend lo requiere explícito
+
         clienteCestaReceta.agregar(linea);
+
+        // Volvemos a la pantalla de la receta (no al catálogo)
         return "redirect:/recetas/nueva";
     }
 
+    // 6. QUITAR ITEM DE LA CESTA
     @GetMapping("/recetas/quitar/{id}")
     public String quitarMedicamento(@PathVariable Long id) {
         clienteCestaReceta.quitar(id);
         return "redirect:/recetas/nueva";
     }
 
+    // 7. LIMPIAR CESTA COMPLETA
+    @GetMapping("/recetas/limpiar")
+    public String limpiarCestaReceta() {
+        clienteCestaReceta.nuevaCesta();
+        return "redirect:/recetas/nueva";
+    }
+
+    // 8. CREAR RECETA (Confirmación Final)
     @PostMapping("/recetas/guardar")
-    public String guardarReceta(@RequestParam Long idMed) {
+    public String crearReceta(@RequestParam Long idMed) {
+        // Preparamos la entrada básica
         EntradaRecetaDTO entrada = new EntradaRecetaDTO();
         entrada.setFec(LocalDate.now().toString());
         entrada.setHor(LocalTime.now().toString().substring(0, 5));
         entrada.setIdMed(idMed);
 
+        // Llamamos al orquestador (ApiGestionReceta jalará la cesta de ApiCestaReceta)
         clienteGestionReceta.grabar(entrada);
+
         return "redirect:/recetas";
-    }
-
-    // ==========================================
-    // MÓDULO FICHA ANÁLISIS
-    // ==========================================
-    @GetMapping("/analisis")
-    public String listarAnalisis(Model model, @RequestParam(required = false) Long idVer) {
-        model.addAttribute("activeLink", "analisis");
-
-        try {
-            model.addAttribute("fichas", clienteFicha.listar());
-        } catch (Exception e) {
-            model.addAttribute("fichas", new ArrayList<>());
-        }
-
-        try {
-            model.addAttribute("atenciones", clienteAtencion.listar());
-        } catch (Exception e) {
-            model.addAttribute("atenciones", new ArrayList<>());
-        }
-
-        if (idVer != null) {
-            try {
-                model.addAttribute("fichaVer", clienteGestionFicha.buscar(idVer));
-                model.addAttribute("modalVerOpen", true);
-            } catch (Exception e) {
-                model.addAttribute("error", "Error detalle: " + e.getMessage());
-            }
-        }
-        return "analisis_listado";
-    }
-
-    @PostMapping("/analisis/iniciar")
-    public String iniciarAnalisis(@RequestParam Long idAte) {
-        clienteNuevaFicha.iniciar(new EntradaInicioDTO(idAte));
-        clienteCestaFicha.nuevaCesta();
-        return "redirect:/analisis/nueva";
-    }
-
-    @GetMapping("/analisis/nueva")
-    public String formNuevaAnalisis(Model model) {
-        model.addAttribute("activeLink", "analisis");
-        try {
-            model.addAttribute("cabecera", clienteNuevaFicha.obtenerSalida());
-            model.addAttribute("cesta", clienteCestaFicha.verCesta());
-            model.addAttribute("total", clienteCestaFicha.verTotal());
-            model.addAttribute("tiposAnalisis", clienteTipoAnalisis.listar());
-        } catch (Exception e) {
-            return "redirect:/analisis";
-        }
-        return "analisis_form";
-    }
-
-    @PostMapping("/analisis/agregar")
-    public String agregarAnalisis(
-            @RequestParam Long idTipAna, @RequestParam String nom,
-            @RequestParam String des, @RequestParam double pre, @RequestParam int can) {
-
-        LineaFichaAnalisisDTO linea = new LineaFichaAnalisisDTO();
-        linea.setIdTipAna(idTipAna);
-        linea.setNom(nom);
-        linea.setDes(des);
-        linea.setPre(pre);
-        linea.setCan(can);
-
-        clienteCestaFicha.agregar(linea);
-        return "redirect:/analisis/nueva";
-    }
-
-    @GetMapping("/analisis/quitar/{id}")
-    public String quitarAnalisis(@PathVariable Long id) {
-        clienteCestaFicha.quitar(id);
-        return "redirect:/analisis/nueva";
-    }
-
-    @PostMapping("/analisis/guardar")
-    public String guardarAnalisis(@RequestParam Long idMed) {
-        EntradaFichaAnalisisDTO entrada = new EntradaFichaAnalisisDTO();
-        entrada.setFec(LocalDate.now().toString());
-        entrada.setHor(LocalTime.now().toString().substring(0, 5));
-        entrada.setIdMed(idMed);
-
-        clienteGestionFicha.grabar(entrada);
-        return "redirect:/analisis";
     }
 }

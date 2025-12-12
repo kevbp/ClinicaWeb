@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: main-layout(~{::section})}">
+    <section>
+        <div class="container py-2">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h4">Nueva Receta Médica</h2>
+                <a href="/recetas" class="btn btn-outline-secondary">Cancelar</a>
+            </div>
+
+            <div class="card mb-4 border-primary shadow-sm">
+                <div class="card-header bg-primary text-white bg-opacity-75">
+                    <i class="fa-solid fa-user-injured me-2"></i>Datos de la Atención
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-2 border-end">
+                            <small class="text-muted d-block text-uppercase">Nro. Atención</small>
+                            <strong class="fs-5" th:text="${cabecera.ate.idAte}"></strong>
+                        </div>
+                        <div class="col-md-3 border-end">
+                            <small class="text-muted d-block text-uppercase">Especialidad</small>
+                            <strong th:text="${cabecera.ate.cita.med.esp.nom}"></strong>
+                        </div>
+                        <div class="col-md-3 border-end">
+                            <small class="text-muted d-block text-uppercase">Paciente</small>
+                            <strong class="text-primary" th:text="${cabecera.ate.pac.nom} + ' ' + ${cabecera.ate.pac.ape}"></strong>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted d-block text-uppercase">Médico Tratante</small>
+                            <strong th:text="${cabecera.ate.cita.med.nom} + ' ' + ${cabecera.ate.cita.med.ape}"></strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                    <h5 class="mb-0 text-secondary">Medicamentos Prescritos</h5>
+                    <a href="/recetas/catalogo" class="btn btn-success">
+                        <i class="fa-solid fa-pills me-2"></i>Agregar Medicamento
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-striped align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Medicamento</th>
+                                <th>Descripción</th>
+                                <th>Precio Unit.</th>
+                                <th class="text-center">Cant.</th>
+                                <th class="text-end pe-4">Importe</th>
+                                <th class="text-center">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(cesta)}">
+                                <td colspan="6" class="text-center py-4 text-muted">La cesta está vacía.</td>
+                            </tr>
+                            <tr th:each="item : ${cesta}">
+                                <td class="ps-4" th:text="${item.nom}"></td>
+                                <td th:text="${item.des}"></td>
+                                <td th:text="'S/ ' + ${item.pre}"></td>
+                                <td class="text-center fw-bold" th:text="${item.can}"></td>
+                                <td class="text-end pe-4 fw-bold text-success" 
+                                    th:text="'S/ ' + ${#numbers.formatDecimal(item.importe != null ? item.importe : (item.pre * item.can), 1, 2)}">
+                                </td>
+                                <td class="text-center">
+                                    <a th:href="@{/recetas/quitar/{id}(id=${item.idMto})}" class="btn btn-sm btn-outline-danger">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot th:unless="${#lists.isEmpty(cesta)}">
+                            <tr class="table-active">
+                                <td colspan="4" class="text-end fw-bold fs-5">TOTAL ESTIMADO:</td>
+                                <td class="text-end pe-4 fw-bold fs-5 text-primary" th:text="'S/ ' + ${#numbers.formatDecimal(total, 1, 2)}"></td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <div class="card-footer bg-white py-3">
+                    <div class="d-flex justify-content-between align-items-end">
+                        <a href="/recetas/limpiar" class="btn btn-outline-warning text-dark align-self-center">
+                            <i class="fa-solid fa-broom me-2"></i>Limpiar
+                        </a>
+
+                        <form th:action="@{/recetas/guardar}" method="post" class="w-50">
+                            <div class="row g-2 justify-content-end">
+                                <div class="col-12 mb-2">
+                                    <label class="small text-muted fw-bold">Médico que receta:</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="fa-solid fa-user-doctor"></i></span>
+                                        <select name="idMed" class="form-select" required>
+                                            <option th:each="m : ${medicos}" 
+                                                    th:value="${m.id}" 
+                                                    th:text="${m.nom} + ' ' + ${m.ape} + ' (' + ${m.esp.nom} + ')'"
+                                                    th:selected="${m.id == cabecera.ate.cita.med.id}">
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-12 text-end">
+                                    <button type="submit" class="btn btn-primary w-100" th:disabled="${#lists.isEmpty(cesta)}">
+                                        <i class="fa-solid fa-save me-2"></i>Crear Receta
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</html>
