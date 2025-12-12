@@ -463,6 +463,52 @@ public class PortalController {
     }
 
     // ==========================================
+    // GESTIÓN DE MEDICAMENTOS
+    // ==========================================
+    @GetMapping("/medicamentos")
+    public String listarMedicamentos(Model model) {
+        model.addAttribute("activeLink", "medicamentos");
+        model.addAttribute("medicamentos", clienteApiMedicamento.listar());
+        model.addAttribute("nuevoMedicamento", new MedicamentoDTO());
+        return "medicamentos";
+    }
+
+    @PostMapping("/medicamentos/guardar")
+    public String guardarMedicamento(@ModelAttribute MedicamentoDTO m) {
+        clienteApiMedicamento.grabar(m);
+        return "redirect:/medicamentos";
+    }
+
+    @GetMapping("/medicamentos/eliminar/{id}")
+    public String eliminarMedicamento(@PathVariable Long id) {
+        clienteApiMedicamento.eliminar(id);
+        return "redirect:/medicamentos";
+    }
+
+    // ==========================================
+    // GESTIÓN DE TIPOS DE ANÁLISIS
+    // ==========================================
+    @GetMapping("/tipos-analisis")
+    public String listarTiposAnalisis(Model model) {
+        model.addAttribute("activeLink", "tipos-analisis");
+        model.addAttribute("tipos", clienteTipoAnalisis.listar());
+        model.addAttribute("nuevoTipo", new TipoAnalisisDTO());
+        return "tipos_analisis";
+    }
+
+    @PostMapping("/tipos-analisis/guardar")
+    public String guardarTipoAnalisis(@ModelAttribute TipoAnalisisDTO t) {
+        clienteTipoAnalisis.grabar(t);
+        return "redirect:/tipos-analisis";
+    }
+
+    @GetMapping("/tipos-analisis/eliminar/{id}")
+    public String eliminarTipoAnalisis(@PathVariable Long id) {
+        clienteTipoAnalisis.eliminar(id);
+        return "redirect:/tipos-analisis";
+    }
+
+    // ==========================================
     // MÓDULO RECETAS (FLUJO NUEVO)
     // ==========================================
     // 1. VISTA RECETAS (Listado Histórico + Modal Nueva)
@@ -470,21 +516,42 @@ public class PortalController {
     public String vistaRecetas(Model model, @RequestParam(required = false) Long idVer) {
         model.addAttribute("activeLink", "recetas");
 
-        // Listar Recetas (Desde ApiReceta)
+        // A. Listar Recetas (Desde ApiReceta)
         try {
             model.addAttribute("recetas", clienteReceta.listar());
         } catch (Exception e) {
             model.addAttribute("recetas", new ArrayList<>());
         }
 
-        // Listar Atenciones (Desde ApiAtencion - directo para el modal)
+        // B. Listar Atenciones ENRIQUECIDAS (Para el selector del Modal "Nueva Receta")
+        //    Aquí transformamos los datos planos (AtencionDTO) en datos ricos (SalidaAtencionDTO)
+        List<SalidaAtencionDTO> atencionesRicas = new ArrayList<>();
         try {
-            model.addAttribute("atenciones", clienteAtencion.listar());
-        } catch (Exception e) {
-            model.addAttribute("atenciones", new ArrayList<>());
-        }
+            // 1. Obtenemos la lista básica (IDs)
+            List<AtencionDTO> listaPlana = clienteAtencion.listar();
 
-        // Ver Detalles (Desde ApiGestionReceta - Modal)
+            if (listaPlana != null) {
+                // 2. Iteramos para buscar el detalle completo de cada una
+                for (AtencionDTO simple : listaPlana) {
+                    try {
+                        // Llamamos al orquestador para obtener nombres de Paciente, Médico, etc.
+                        SalidaAtencionDTO detallada = clienteGestionAtencion.buscar(simple.getId());
+                        if (detallada != null) {
+                            atencionesRicas.add(detallada);
+                        }
+                    } catch (Exception ex) {
+                        // Si falla una específica, la ignoramos y seguimos
+                        System.out.println("Error enriqueciendo atención " + simple.getId());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error al cargar lista de atenciones: " + e.getMessage());
+        }
+        // Enviamos la lista "Rica" que sí tiene los campos que pide tu HTML (idAte, cit.pac.nom, etc.)
+        model.addAttribute("atenciones", atencionesRicas);
+
+        // C. Ver Detalles (Funcionalidad del "Ojito")
         if (idVer != null) {
             try {
                 model.addAttribute("recetaVer", clienteGestionReceta.buscar(idVer));
@@ -493,7 +560,7 @@ public class PortalController {
                 model.addAttribute("error", "Error cargando detalle: " + e.getMessage());
             }
         }
-        return "recetas_listado"; // Nombre solicitado
+        return "recetas_listado";
     }
 
     // 2. INICIAR PROCESO (Redirecciona a la vista de creación)

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: main-layout(~{::section})}">
+    <section>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3>Gestión de Medicamentos</h3>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalMedicamento">
+                <i class="fa-solid fa-plus"></i> Nuevo
+            </button>
+        </div>
+        <div class="card p-0 overflow-hidden">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th>Precio</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="m : ${medicamentos}">
+                        <td class="fw-bold" th:text="${'#'+m.id}"></td>
+                        <td th:text="${m.nom}"></td>
+                        <td th:text="${m.des}"></td>
+                        <td th:text="'S/ ' + ${m.pre}"></td>
+                        <td>
+                            <a th:href="@{/medicamentos/eliminar/{id}(id=${m.id})}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar medicamento?');">
+                                <i class="fa-solid fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="modal fade" id="modalMedicamento" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form action="/medicamentos/guardar" method="post" th:object="${nuevoMedicamento}">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Nuevo Medicamento</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label>Nombre</label>
+                                <input type="text" class="form-control" th:field="*{nom}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label>Descripción</label>
+                                <input type="text" class="form-control" th:field="*{des}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label>Precio</label>
+                                <input type="number" step="0.01" class="form-control" th:field="*{pre}" required>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Guardar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</html>

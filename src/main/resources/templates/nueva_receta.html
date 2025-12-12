@@ -19,15 +19,15 @@
                         </div>
                         <div class="col-md-3 border-end">
                             <small class="text-muted d-block text-uppercase">Especialidad</small>
-                            <strong th:text="${cabecera.ate.cita.med.esp.nom}"></strong>
+                            <strong th:text="${cabecera.ate.cit.esp.des}"></strong>
                         </div>
                         <div class="col-md-3 border-end">
                             <small class="text-muted d-block text-uppercase">Paciente</small>
-                            <strong class="text-primary" th:text="${cabecera.ate.pac.nom} + ' ' + ${cabecera.ate.pac.ape}"></strong>
+                            <strong class="text-primary" th:text="${cabecera.ate.cit.pac.nom}"></strong>
                         </div>
                         <div class="col-md-4">
                             <small class="text-muted d-block text-uppercase">Médico Tratante</small>
-                            <strong th:text="${cabecera.ate.cita.med.nom} + ' ' + ${cabecera.ate.cita.med.ape}"></strong>
+                            <strong th:text="${cabecera.ate.cit.med.nom}"></strong>
                         </div>
                     </div>
                 </div>
@@ -96,8 +96,8 @@
                                         <select name="idMed" class="form-select" required>
                                             <option th:each="m : ${medicos}" 
                                                     th:value="${m.id}" 
-                                                    th:text="${m.nom} + ' ' + ${m.ape} + ' (' + ${m.esp.nom} + ')'"
-                                                    th:selected="${m.id == cabecera.ate.cita.med.id}">
+                                                    th:text="${m.nom}"
+                                                    th:selected="${m.id == cabecera.ate.cit.med.id}">
                                             </option>
                                         </select>
                                     </div>

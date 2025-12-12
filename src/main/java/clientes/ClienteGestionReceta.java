@@ -8,9 +8,11 @@ import org.springframework.web.bind.annotation.*;
 @FeignClient(name = "ApiGestionReceta")
 public interface ClienteGestionReceta {
 
-    @PostMapping("/gestionReceta/grabar")
-    SalidaRecetaDTO grabar(@RequestBody EntradaRecetaDTO entrada); // Usa DTO
+    // CORREGIDO: La ruta debe coincidir con @RequestMapping + @PostMapping del microservicio
+    @PostMapping("/apiGestionReceta/procesarYGrabar")
+    SalidaRecetaDTO grabar(@RequestBody EntradaRecetaDTO entrada);
 
-    @GetMapping("/gestionReceta/buscar/{id}")
+    // CORREGIDO: Asumo que el buscar también tiene el prefijo /apiGestionReceta
+    @GetMapping("/apiGestionReceta/buscar/{id}")
     SalidaRecetaDTO buscar(@PathVariable("id") Long id);
 }

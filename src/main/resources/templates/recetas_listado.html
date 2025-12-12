@@ -1,113 +1,162 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: main-layout(~{::section})}">
     <section>
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="h4"><i class="fa-solid fa-file-prescription me-2 text-primary"></i>Gestión de Recetas</h2>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNueva">
-                <i class="fa-solid fa-plus me-2"></i>Nueva Receta
-            </button>
-        </div>
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h4"><i class="fa-solid fa-file-prescription me-2 text-primary"></i>Gestión de Recetas</h2>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNueva">
+                    <i class="fa-solid fa-plus me-2"></i>Nueva Receta
+                </button>
+            </div>
 
-        <div class="card shadow-sm border-0">
-            <div class="card-body p-0">
-                <div th:if="${#lists.isEmpty(recetas)}" class="p-4 text-center text-muted">No hay recetas registradas.</div>
-                <table th:unless="${#lists.isEmpty(recetas)}" class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="ps-4">ID</th>
-                            <th>Fecha</th>
-                            <th>Hora</th>
-                            <th>ID Atención</th>
-                            <th class="text-end pe-4">Total</th>
-                            <th class="text-center">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="r : ${recetas}">
-                            <td class="ps-4 fw-bold" th:text="${r.id}"></td>
-                            <td th:text="${r.fec}"></td>
-                            <td th:text="${r.hor}"></td>
-                            <td><span class="badge bg-secondary" th:text="${r.idAte}"></span></td>
-                            <td class="text-end pe-4 fw-bold text-success" th:text="'S/ ' + ${#numbers.formatDecimal(r.tot, 1, 2)}"></td>
-                            <td class="text-center">
-                                <a th:href="@{/recetas(idVer=${r.id})}" class="btn btn-sm btn-outline-info" title="Ver Detalles">
-                                    <i class="fa-solid fa-eye"></i>
-                                </a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-0">
+                    <div th:if="${#lists.isEmpty(recetas)}" class="p-4 text-center text-muted">No hay recetas registradas.</div>
+
+                    <table th:unless="${#lists.isEmpty(recetas)}" class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">ID</th>
+                                <th>Fecha</th>
+                                <th>Hora</th>
+                                <th>ID Atención</th>
+                                <th class="text-end pe-4">Total</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="r : ${recetas}">
+                                <td class="ps-4 fw-bold" th:text="${'REC-' + r.id}"></td>
+                                <td th:text="${r.fec}"></td>
+                                <td th:text="${r.hor}"></td>
+                                <td><span class="badge bg-secondary" th:text="${'#' + r.idAte}"></span></td>
+                                <td class="text-end pe-4 fw-bold text-success" th:text="'S/ ' + ${#numbers.formatDecimal(r.tot, 1, 2)}"></td>
+                                <td class="text-center">
+                                    <a th:href="@{/recetas(idVer=${r.id})}" class="btn btn-sm btn-outline-info" title="Ver Detalles">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
         <div class="modal fade" id="modalNueva" tabindex="-1">
-            <div class="modal-dialog modal-lg">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title">Seleccionar Atención</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        <h5 class="modal-title">Seleccionar Atención para Receta</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body p-0">
-                        <table class="table table-striped mb-0">
+                        <table class="table table-striped table-hover mb-0 align-middle">
                             <thead class="table-light">
                                 <tr>
                                     <th class="ps-4">ID</th>
-                                    <th>Paciente (ID)</th>
-                                    <th>Médico (ID)</th>
+                                    <th>Paciente</th>
+                                    <th>Médico</th>
                                     <th>Fecha</th>
-                                    <th>Acción</th>
+                                    <th class="text-center">Acción</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr th:each="a : ${atenciones}">
-                                    <td class="ps-4 fw-bold" th:text="${a.id}"></td>
-                                    <td th:text="${a.idPac}"></td>
-                                    <td th:text="${a.idMed}"></td>
-                                    <td th:text="${a.fec}"></td>
-                                    <td>
+                                    <td class="ps-4 fw-bold" th:text="${a.idAte}"></td>
+
+                                    <td th:text="${a.cit.pac.nom}"></td>
+
+                                    <td th:text="${a.cit.med.nom}"></td>
+
+                                    <td th:text="${a.fec} + ' ' + ${a.hor}"></td>
+                                    <td class="text-center">
                                         <form th:action="@{/recetas/iniciar}" method="post">
-                                            <input type="hidden" name="idAte" th:value="${a.id}"/>
-                                            <button type="submit" class="btn btn-sm btn-success">Nueva Receta</button>
+                                            <input type="hidden" name="idAte" th:value="${a.idAte}"/>
+                                            <button type="submit" class="btn btn-sm btn-success">
+                                                <i class="fa-solid fa-check me-1"></i>Elegir
+                                            </button>
                                         </form>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
+                        <div th:if="${#lists.isEmpty(atenciones)}" class="p-3 text-center text-muted">
+                            No se encontraron atenciones disponibles.
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="modal fade" id="modalVer" tabindex="-1" th:if="${modalVerOpen}">
-            <div class="modal-dialog modal-lg">
+        <div class="modal fade" id="modalVer" tabindex="-1" role="dialog"
+             th:if="${modalVerOpen}" 
+             th:classappend="${modalVerOpen} ? 'show d-block'"
+             style="background-color: rgba(0,0,0,0.5);">
+
+            <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header bg-info text-white">
-                        <h5 class="modal-title">Detalle Receta #<span th:text="${recetaVer.id}"></span></h5>
-                        <a th:href="@{/recetas}" class="btn-close"></a>
+                        <h5 class="modal-title">
+                            <i class="fa-solid fa-file-lines me-2"></i>Detalle Receta #<span th:text="${recetaVer.id}"></span>
+                        </h5>
+                        <a href="/recetas" class="btn-close btn-close-white"></a>
                     </div>
+
                     <div class="modal-body">
-                        <div class="row mb-3">
-                            <div class="col-6"><strong>Paciente:</strong> <span th:text="${recetaVer.ate.pac.nom} + ' ' + ${recetaVer.ate.pac.ape}"></span></div>
-                            <div class="col-6"><strong>Médico:</strong> <span th:text="${recetaVer.med.nom} + ' ' + ${recetaVer.med.ape}"></span></div>
+                        <div class="row g-3 mb-4 p-3 bg-light rounded border mx-0">
+                            <div class="col-md-4">
+                                <small class="text-muted fw-bold d-block">ATENCIÓN ORIGINAL</small>
+                                <span class="fs-5" th:text="'#' + ${recetaVer.ate.idAte}"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted fw-bold d-block">PACIENTE</small>
+                                <span class="text-primary fw-bold" th:text="${recetaVer.ate.cit.pac.nom}"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted fw-bold d-block">MÉDICO PRESCRIPTOR</small>
+                                <span th:text="${recetaVer.med.nom}"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted fw-bold d-block">FECHA EMISIÓN</small>
+                                <span th:text="${recetaVer.fec} + ' - ' + ${recetaVer.hor}"></span>
+                            </div>
                         </div>
-                        <table class="table table-bordered table-sm">
-                            <thead class="table-light"><tr><th>Medicamento</th><th>Desc</th><th>Cant</th><th>Importe</th></tr></thead>
+
+                        <h6 class="border-bottom pb-2 mb-2 text-secondary">Medicamentos Entregados</h6>
+                        <table class="table table-bordered table-sm align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Medicamento</th>
+                                    <th>Descripción</th>
+                                    <th class="text-center">Cant.</th>
+                                    <th class="text-end">Precio Unit.</th>
+                                    <th class="text-end">Importe</th>
+                                </tr>
+                            </thead>
                             <tbody>
                                 <tr th:each="d : ${recetaVer.detRec}">
-                                    <td th:text="${d.nomMto}"></td>
-                                    <td th:text="${d.desMto}"></td>
-                                    <td th:text="${d.can}"></td>
-                                    <td class="text-end" th:text="${d.imp}"></td>
+                                    <td class="fw-bold text-primary" th:text="${d.nomMto}"></td>
+                                    <td class="small text-muted" th:text="${d.desMto}"></td>
+                                    <td class="text-center fw-bold" th:text="${d.can}"></td>
+                                    <td class="text-end" th:text="'S/ ' + ${#numbers.formatDecimal(d.pre, 1, 2)}"></td>
+                                    <td class="text-end" th:text="'S/ ' + ${#numbers.formatDecimal(d.imp, 1, 2)}"></td>
                                 </tr>
                             </tbody>
                             <tfoot>
-                                <tr><td colspan="3" class="text-end fw-bold">TOTAL:</td><td class="text-end" th:text="${recetaVer.tot}"></td></tr>
+                                <tr class="table-active">
+                                    <td colspan="4" class="text-end fw-bold fs-5">TOTAL:</td>
+                                    <td class="text-end fw-bold fs-5 text-success" th:text="'S/ ' + ${#numbers.formatDecimal(recetaVer.tot, 1, 2)}"></td>
+                                </tr>
                             </tfoot>
                         </table>
+                    </div>
+                    <div class="modal-footer">
+                        <a href="/recetas" class="btn btn-secondary">Cerrar</a>
+                        <button class="btn btn-outline-primary" onclick="window.print()"><i class="fa-solid fa-print"></i> Imprimir</button>
                     </div>
                 </div>
             </div>
         </div>
-        <script th:if="${modalVerOpen}">new bootstrap.Modal(document.getElementById('modalVer')).show();</script>
     </section>
 </html>
